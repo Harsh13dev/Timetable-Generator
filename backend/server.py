@@ -35,8 +35,8 @@ app.add_middleware(
 # --- Database Setup ---
 client = pymongo.MongoClient(
    os.getenv("MONGO_URI"),
-    tls=True,
-    tlsAllowInvalidCertificates=False
+    # tls=True,
+    # tlsAllowInvalidCertificates=False
 )
 db = client["timetableDB"]
 collection = db["timetables"]
