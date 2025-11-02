@@ -1,201 +1,189 @@
-// frontend/src/pages/generate/AddTeacher.jsx (UPDATED CONTENT)
-import { useState, useEffect } from "react";
-import { Plus, Loader2, X, Save, AlertTriangle, RefreshCw } from "lucide-react";
+// frontend/src/pages/generate/AddTeacher.jsx (FINAL CRASH-PROOF VERSION)
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
-// import { useAuth, useUser } from "@clerk/clerk-react"; // Authentication is commented out
-// import DropdownChecklist from "./components/DropdownChecklist"; // Not needed with new input style
-import TimetableDisplay from "./TimetableDisplay";
-// import EditTimetable from "./components/EditTimetable"; // Not needed here
-// import { fetchWithAuth } from "../../utils/fetchWithAuth"; // Not needed here
 import toast from "react-hot-toast";
+import { CircleX, Loader2, Plus, X, AlertTriangle } from "lucide-react"; 
 
-function AddTeacher() {
+// NOTE: All external CSS imports were removed to resolve the crash.
+
+const AddTeacher = () => {
   const navigate = useNavigate();
-  // const { getToken } = useAuth(); // Commented out
-  // const { user } = useUser(); // Commented out
-  const { state } = useLocation();
   const location = useLocation();
+
+  // Hardcoded User ID
+  const userId = "placeholder_user_id";
+
+  // State from previous steps (Ensure safe defaults)
+  const [title] = useState(location.state?.title || "Untitled Timetable");
+  const [classes] = useState(location.state?.classes || []);
+  const [subjects] = useState(location.state?.subjects || []);
+  const [batches] = useState(location.state?.batches || ["Batch 1", "Batch 2"]); 
+  const [classrooms] = useState(location.state?.classrooms || []);
+  const [labs] = useState(location.state?.labs || []);
+  const [workingDays] = useState(location.state?.workingDays || 5);
+  const [periods] = useState(location.state?.periods || 8);
+  const [timetableId] = useState(location.state?.timetableId || null);
+
+  // Reverted data structure: 'teachers' and 'periods'
+  const initialFacultyState = location.state?.teacherData || [
+      { name: "", periods: [{ class_name: "", subject: "", noOfPeriods: "" }] },
+  ];
+  
+  const [teachers, setTeachers] = useState(initialFacultyState);
+
+  // UI States
+  const [generatedTimetableResult, setGeneratedTimetableResult] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [errorDetails, setErrorDetails] = useState(null);
-  
-  // Hardcoded ID for non-authenticated user
-  const userId = "placeholder_user_id";
+
+  // Helper to get unique subjects for dropdowns
+  const getAllSubjects = () => {
+    return subjects.filter(sub => sub.trim() !== "");
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // NEW/UPDATED State variables from previous step (GeneratePage.jsx)
-  const {
-    classes,
-    subjects,
-    classrooms,
-    labs,
-    batches,
-    workingDays,
-    periods,
-    title,
-    teacherData, // Now Faculty Data
-    timetableId,
-  } = state || {};
 
-  const [faculty, setFaculty] = useState(() => {
-    if (teacherData) {
-      return teacherData; // Use existing data if available
-    }
-    // New initial structure based on requirements (Faculty Load Distribution)
-    return [
-      {
-        name: "",
-        load_assignments: [{ 
-          subject: "", 
-          class_name: "", 
-          lecture_load: "", 
-          lab_load: "" 
-        }],
-      },
-    ];
-  });
+  // --- Input Handlers (Standard functions) ---
 
-  const [loading, setLoading] = useState(false);
-  const [timetableData, setTimetableData] = useState(null);
-  const [savedFacultyData, setSavedFacultyData] = useState(null);
-
-  // --- Input Handlers (Modified for New Structure) ---
-
-  const handleAddFaculty = () => {
-    setFaculty([
-      ...faculty,
-      {
-        name: "",
-        load_assignments: [{ 
-            subject: "", 
-            class_name: "", 
-            lecture_load: "", 
-            lab_load: "" 
-        }],
-      },
+  const handleAddTeacher = () => {
+    setTeachers([
+      ...teachers,
+      { name: "", periods: [{ class_name: "", subject: "", noOfPeriods: "" }] },
     ]);
   };
 
-  const handleDeleteFaculty = (index) => {
-    if (faculty.length > 1) {
-      const newFaculty = faculty.filter((_, i) => i !== index);
-      setFaculty(newFaculty);
-    }
-  };
-
-  const handleAddAssignment = (index) => {
-    const newFaculty = [...faculty];
-    newFaculty[index].load_assignments = [
-      ...newFaculty[index].load_assignments,
-      { subject: "", class_name: "", lecture_load: "", lab_load: "" },
-    ];
-    setFaculty(newFaculty);
-  };
-
-  const handleDeleteAssignment = (facultyIndex, assignmentIndex) => {
-    const newFaculty = [...faculty];
-    if (newFaculty[facultyIndex].load_assignments.length > 1) {
-      newFaculty[facultyIndex].load_assignments = newFaculty[
-        facultyIndex
-      ].load_assignments.filter((_, i) => i !== assignmentIndex);
-      setFaculty(newFaculty);
-    }
+  const handleDeleteTeacher = (index) => {
+    const updatedTeachers = [...teachers];
+    updatedTeachers.splice(index, 1);
+    setTeachers(updatedTeachers);
   };
   
-  const handleChangeFacultyName = (index, facultyName) => {
-    const newFaculty = [...faculty];
-    newFaculty[index].name = facultyName;
-    setFaculty(newFaculty);
+  const handleAddPeriod = (index) => {
+    const newTeachers = [...teachers];
+    newTeachers[index].periods = [
+      ...newTeachers[index].periods,
+      { class_name: "", subject: "", noOfPeriods: "" },
+    ];
+    setTeachers(newTeachers);
   };
 
-  const handleChangeAssignment = (fIndex, aIndex, field, value) => {
-    const newFaculty = [...faculty];
-    newFaculty[fIndex].load_assignments[aIndex][field] = value;
-    setFaculty(newFaculty);
+  const handleDeletePeriod = (teacherIndex, periodIndex) => {
+    const newTeachers = [...teachers];
+    if (newTeachers[teacherIndex].periods.length > 1) {
+      newTeachers[teacherIndex].periods.splice(periodIndex, 1);
+      setTeachers(newTeachers);
+    }
   };
 
-  // --- Timetable Generation ---
+  const handleChangePeriod = (index, ind, field, value) => {
+    const newTeachers = [...teachers];
+    const processedValue = (field === 'noOfPeriods') ? parseInt(value) || 0 : value;
+    newTeachers[index].periods[ind][field] = processedValue;
+    setTeachers(newTeachers);
+  };
 
+  const handleChangeTeacherName = (index, teacherName) => {
+    const newTeachers = [...teachers];
+    newTeachers[index].name = teacherName;
+    setTeachers(newTeachers);
+  };
+
+  // --- Data Conversion & Generation (CRITICAL MAPPING) ---
   const generateTimetable = async () => {
     setLoading(true);
     setError("");
     setErrorDetails(null);
+    setGeneratedTimetableResult(null); 
 
     try {
-      // Input Validation (Simplified)
-      for (const fac of faculty) {
-        if (!fac.name.trim()) {
-          throw new Error("Please enter all Faculty names.");
-        }
-        if (fac.load_assignments.some(a => !a.subject || !a.class_name || (!a.lecture_load && !a.lab_load))) {
-            throw new Error(`Please fill all load details for ${fac.name}.`);
-        }
+      // Validation
+      if (!title.trim()) throw new Error("Please provide a title for the timetable.");
+      if (classes.length === 0) throw new Error("Please specify at least one class.");
+      for (const t of teachers) {
+          if (!t.name.trim()) throw new Error("Please enter all Faculty names.");
+          if (t.periods.some(p => !p.class_name || !p.subject || !p.noOfPeriods)) {
+              throw new Error(`Please fill all period assignments for ${t.name}`);
+          }
       }
+      
+      // --- MAPPING FROM SIMPLE UI TO COMPLEX LOAD STRUCTURE ---
+      const facultyDataForAPI = teachers.map(t => {
+        const loadMap = {}; 
 
-      setSavedFacultyData(JSON.parse(JSON.stringify(faculty)));
+        t.periods.forEach(p => {
+          const key = `${p.class_name}-${p.subject}`;
+          const totalLoad = parseInt(p.noOfPeriods) || 0;
+          
+          if (!loadMap[key]) {
+              loadMap[key] = { lecture_load: 0, lab_load: 0 };
+          }
+          
+          const isLabSubject = p.subject.toLowerCase().includes('lab');
 
-      // Prepare Data for API (Using the new Input Models)
-      const facultyDataForAPI = faculty.map(fac => ({
-          name: fac.name,
-          load_assignments: fac.load_assignments.map(a => ({
-              subject: a.subject,
-              class_name: a.class_name,
-              lecture_load: parseInt(a.lecture_load) || 0,
-              lab_load: parseInt(a.lab_load) || 0,
-          })),
-      }));
+          if (isLabSubject) {
+              if (totalLoad % 2 !== 0 && totalLoad > 0) {
+                   throw new Error(`Lab subject '${p.subject}' load for ${t.name} is ${totalLoad}. Must be an EVEN number for double blocks.`);
+              }
+              loadMap[key].lab_load += totalLoad;
+          } else {
+              loadMap[key].lecture_load += totalLoad;
+          }
+        });
 
-      // Map syllabus structure for API - Derived from faculty load for validation/reference
-      const syllabusMap = {};
-      classes.forEach(cls => {
-          syllabusMap[cls] = facultyDataForAPI
-              .flatMap(f => f.load_assignments)
-              .filter(a => a.class_name === cls)
-              .map(a => ({
-                  subject: a.subject,
-                  lecture_load: a.lecture_load,
-                  lab_load: a.lab_load
-              }));
+        const load_assignments = Object.keys(loadMap).map(key => {
+          const [class_name, subject] = key.split('-');
+          return {
+            subject: subject,
+            class_name: class_name,
+            lecture_load: loadMap[key].lecture_load,
+            lab_load: loadMap[key].lab_load,
+          };
+        });
+
+        return { name: t.name, load_assignments: load_assignments };
       });
 
+
       const requestData = {
-        userId: userId, // Hardcoded
+        userId: userId,
         title: title,
-        workingDays: parseInt(workingDays) || 5,
-        periods: parseInt(periods) || 8,
-        classes: classes.filter((c) => c.trim()),
-        batches: batches, // Fixed Batches
-        classrooms: classrooms, // Resource List
-        labs: labs, // Resource List
-        syllabus: syllabusMap, // Syllabus Data (For backend validation/reference)
-        faculty: facultyDataForAPI, // Faculty Data
+        workingDays: parseInt(workingDays),
+        periods: parseInt(periods),
+        classes: classes.filter(c => c.trim()),
+        batches: batches,
+        classrooms: classrooms.filter(c => c.trim()),
+        labs: labs.filter(l => l.trim()),
+        syllabus: {}, 
+        faculty: facultyDataForAPI,
       };
       
-      // Standard fetch call (Authentication disabled)
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/generate`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(requestData),
         }
       );
 
       const data = await response.json();
+
       if (data.status === "ERROR" || data.status === "INFEASIBLE" || !response.ok) {
         setError(data.message || "Failed to generate timetable");
         setErrorDetails(data);
         return;
       }
 
-      setTimetableData(data);
+      toast.success("Timetable generated successfully!");
+      setGeneratedTimetableResult(data); 
+
     } catch (err) {
       console.error("Error generating timetable:", err);
-      setError(err.message || "Failed to generate timetable");
+      setError(err.message || "Failed to generate timetable due to an unexpected error.");
       setErrorDetails(null);
     } finally {
       setLoading(false);
@@ -203,55 +191,52 @@ function AddTeacher() {
     }
   };
 
-  const handleBackToTeachers = () => {
-    if (savedFacultyData) {
-      setFaculty(savedFacultyData);
-    }
-    setTimetableData(null);
-    setError("");
-    setErrorDetails(null);
-  };
 
-  const handleRegenerateWithCurrentData = async () => {
-    await generateTimetable();
-  };
-
-  // --- Save Logic (Update to handle new data) ---
-
+  // --- Save to DB and Navigate ---
   const handleSavetoDb = async () => {
-    try {
-      if (timetableData !== null) {
-        // The save logic is complex and needs to handle all 4 tables now.
-        // We ensure the API is updated to handle the new multi-timetable object.
-        const facultyDataForSave = timetableData.faculty;
+    if (!generatedTimetableResult) {
+        toast.error("No timetable to save. Please generate one first.");
+        return;
+    }
+    setLoading(true);
 
-        const response = await fetch(
-            `${import.meta.env.VITE_API_BASE_URL}/${timetableId ? `update-timetable/${timetableId}` : 'add'}`,
-            {
-              method: timetableId ? "PUT" : "POST",
+    try {
+        const payload = {
+            ...generatedTimetableResult, 
+            userId: userId,
+            title: title, 
+            faculty: generatedTimetableResult.faculty, 
+        };
+
+        const endpoint = `${import.meta.env.VITE_API_BASE_URL}/${timetableId ? `update-timetable/${timetableId}` : 'add'}`;
+        const method = timetableId ? "PUT" : "POST";
+        
+        const response = await fetch(endpoint, {
+              method: method,
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ 
-                  ...timetableData, 
-                  userId: userId,
-                  faculty: facultyDataForSave, // Ensure this uses the new key
-              }),
-            }
-          );
-          const result = await response.json();
-          toast.success("Timetable saved successfully");
-          navigate(`/display/${result._id || timetableId}`, {
+              body: JSON.stringify(payload),
+        });
+
+        const result = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(result.message || "Failed to save timetable to database.");
+        }
+
+        toast.success("Timetable saved successfully!");
+        
+        // Navigate to display page with all necessary state
+        navigate(`/display/${result._id || timetableId}`, {
             state: {
-                // Pass all generated timetables and metadata
                 timetableId: result._id || timetableId,
-                classTimetable: timetableData.class_timetable,
-                teacherTimetable: timetableData.teacher_timetable, // Using old key for compatibility
-                labTimetable: timetableData.lab_timetable,
-                classroomTimetable: timetableData.classroom_timetable,
+                classTimetable: result.class_timetable,
+                teacherTimetable: result.teacher_timetable,
+                labTimetable: result.lab_timetable,
+                classroomTimetable: result.classroom_timetable,
                 
-                // Pass Metadata
-                teacherData: result.teacherData, // Using 'teacherData' state name for compatibility
+                teacherData: result.teacherData, 
                 classes: result.classes,
-                subjects: result.subjects,
+                subjects: result.subjects, 
                 workingDays: result.workingDays,
                 periods: result.periods,
                 title: result.title,
@@ -259,233 +244,241 @@ function AddTeacher() {
                 labs: result.labs,
                 batches: result.batches,
             },
-          });
-      }
-    } catch (error) {
-      console.log("Error in saving", error);
-      toast.error("Error saving timetable.");
+        });
+
+    } catch (err) {
+      console.error("Error saving timetable:", err);
+      toast.error(err.message || "Failed to save timetable. Please check network and server logs.");
+    } finally {
+      setLoading(false);
     }
   };
 
+  
+  const handleEditFaculty = () => {
+    setGeneratedTimetableResult(null); 
+  }
 
-  // Helper function to render error details (simplified for brevity)
+  const handleRegenerate = () => {
+    setGeneratedTimetableResult(null); 
+    generateTimetable(); 
+  };
+
+
+  // Helper to render error details (simplified)
   const renderErrorDetails = () => {
-    // ... (error display logic as in original file, ensuring it handles the new keys)
-    if (!errorDetails) return null;
+    if (!errorDetails && !error) return null;
 
     return (
       <div className="error-details-container">
         <div className="error-header">
-          <AlertTriangle className="icon-ge error-icon" />
-          <h4>Timetable Generation Failed</h4>
+          <CircleX className="icon-ge error-icon" />
+          <h3>Timetable Generation Failed</h3>
         </div>
-
+        
         <div className="error-content">
-          <p className="error-main-message">{error}</p>
-
-          {/* ... (details and suggestions) ... */}
-          <div className="error-suggestions">
-            <h5>Suggestions to fix this issue:</h5>
-            <ul>
-              <li>Check if total faculty load exceeds available time slots.</li>
-              <li>Ensure all lab loads are even numbers.</li>
-              <li>Verify that subject loads match what's possible with available resources (Labs/Classrooms).</li>
-            </ul>
-          </div>
+          <p className="error-main-message">
+            {error || "An unknown error occurred during generation."}
+          </p>
+          
+          {/* Note: If you want detailed error suggestions, you need to add the logic here */}
         </div>
       </div>
     );
   };
-  
-  // --- JSX Render ---
-  
-  if (timetableData) {
-    // This part would ideally render a temporary preview or immediately redirect.
-    // For now, we show a message and keep the save/regenerate buttons.
-    return (
-      <div className="dark-gradient-bg-ge">
-          <div className="container-ge">
-              <div className="timetable-header">
-                  <h2 className="section-title-ge">Generated Timetable Preview</h2>
-                  <div className="action-buttons-container">
-                    <button className="action-button save-button" onClick={handleSavetoDb} title="Save">
-                      <Save className="icon-ge" /> Save
-                    </button>
-                    <button className="action-button edit-button" onClick={handleBackToTeachers} title="Go back to edit faculty">
-                      <span className="button-icon-td">👥</span> Edit Faculty
-                    </button>
-                    <button className="action-button regenerate-button" onClick={handleRegenerateWithCurrentData} disabled={loading} title="Regenerate timetable with current data">
-                      {loading ? (<><Loader2 className="icon-ge animate-spin" /> Regenerating...</>) : (<><Plus className="icon-ge" /> Regenerate</>)}
-                    </button>
-                  </div>
-              </div>
-              <p style={{color:'yellow', textAlign: 'center', padding: '2rem'}}>
-                Timetable Generated. Click "Save" to finalize and view the 4 comprehensive timetables on the Display Page.
-              </p>
-          </div>
-      </div>
-    );
-  }
 
+
+  // --- JSX Render (Reverted UI Structure) ---
+  
   return (
     <div className="dark-gradient-bg-ge">
       <div className="container-at">
         <div className="header-section">
-          <h2 className="section-title-ge">Assign Faculty & Load Distribution</h2>
+          <h2 className="section-title-ge">Assign Faculty & Period Requirements</h2>
           <div className="info-alert">
-              <strong>College Resources:</strong> Classes: {classes?.join(', ')}, Classrooms: {classrooms?.join(', ')}, Labs: {labs?.join(', ')}
+              Resource Details: Classes: {classes?.join(', ')}, Rooms: {classrooms?.join(', ')}, Labs: {labs?.join(', ')}
+              <br/>NOTE: Lab subjects must have an EVEN total load (e.g., 2, 4, 6).
           </div>
         </div>
 
-        {/* Enhanced Error Display */}
         {error && (
           <div className="error-section">
             {errorDetails ? renderErrorDetails() : (<div className="error-alert"><AlertTriangle className="icon-ge" />{error}</div>)}
           </div>
         )}
 
-        <div className="teachers-container">
-          {faculty.map((fac, fIndex) => (
-            <div className="teacher-card" key={fIndex}>
-              {/* Delete Faculty Button */}
-              {faculty.length > 1 && (
-                <button
-                  onClick={() => handleDeleteFaculty(fIndex)}
-                  className="delete-teacher-btn"
-                  title="Delete Faculty"
-                >
-                  <X className="icon-ge" />
-                </button>
-              )}
+        {/* Conditional rendering: Show faculty input form OR generated timetable actions */}
+        {!generatedTimetableResult ? (
+          <div className="teachers-container">
+            {teachers.map((teacher, index) => {
+              return (
+                <div className="teacher-card" key={index}>
+                  
+                  {/* Delete Teacher Button */}
+                  {teachers.length > 1 && (
+                    <button
+                      onClick={() => handleDeleteTeacher(index)}
+                      className="delete-teacher-btn"
+                      title="Delete Teacher"
+                    >
+                      <X className="icon-ge" />
+                    </button>
+                  )}
 
-              {/* Faculty Name Input */}
-              <div className="teacher-info-row" style={{gridTemplateColumns: '1fr'}}>
-                <div className="input-group-ge">
-                  <label className="input-label">Faculty Name</label>
-                  <input
-                    type="text"
-                    className="form-input-ge"
-                    placeholder={`Faculty ${fIndex + 1}`}
-                    value={fac.name}
-                    onChange={(e) => handleChangeFacultyName(fIndex, e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="periods-section">
-                <h3 className="periods-title">Load Assignments (Subjects taught + Load per Week)</h3>
-                <div className="periods-container">
-                  {fac.load_assignments.map((assignment, aIndex) => (
-                    <div className="period-row" key={aIndex} style={{gridTemplateColumns: '1.5fr 1fr 1fr 1fr', alignItems:'center'}}>
-                        {/* Delete Assignment Button */}
-                        {fac.load_assignments.length > 1 && (
-                            <button
-                                onClick={() => handleDeleteAssignment(fIndex, aIndex)}
-                                className="delete-period-btn"
-                                title="Delete Assignment"
-                            >
-                                <X className="icon-ge" />
-                            </button>
-                        )}
-
-                        <div className="input-group-ge">
-                            <label className="input-label">Subject/Lab Name</label>
-                            <select
-                                className="form-select-ge"
-                                value={assignment.subject}
-                                onChange={(e) => handleChangeAssignment(fIndex, aIndex, 'subject', e.target.value)}
-                            >
-                                <option value="">Select Subject/Lab</option>
-                                {subjects.map((sub, sIndex) => (
-                                    <option key={sIndex} value={sub}>{sub}</option>
-                                ))}
-                            </select>
-                        </div>
-                        
-                        <div className="input-group-ge">
-                            <label className="input-label">Class</label>
-                            <select
-                                className="form-select-ge"
-                                value={assignment.class_name}
-                                onChange={(e) => handleChangeAssignment(fIndex, aIndex, 'class_name', e.target.value)}
-                            >
-                                <option value="">Select Class</option>
-                                {classes.map((cls, cIndex) => (
-                                    <option key={cIndex} value={cls}>{cls}</option>
-                                ))}
-                            </select>
-                        </div>
-                        
-                        <div className="input-group-ge">
-                            <label className="input-label">Lecture Load/Week</label>
-                            <input
-                                type="number"
-                                className="form-input-ge"
-                                placeholder="Lectures"
-                                value={assignment.lecture_load}
-                                onChange={(e) => handleChangeAssignment(fIndex, aIndex, 'lecture_load', e.target.value)}
-                                min="0"
-                            />
-                        </div>
-                        
-                        <div className="input-group-ge">
-                            <label className="input-label">Lab Load/Week (Must be Even)</label>
-                            <input
-                                type="number"
-                                className="form-input-ge"
-                                placeholder="Lab Periods (e.g., 4)"
-                                value={assignment.lab_load}
-                                onChange={(e) => handleChangeAssignment(fIndex, aIndex, 'lab_load', e.target.value)}
-                                min="0"
-                            />
-                        </div>
+                  <div className="teacher-info-row" style={{gridTemplateColumns: '1fr'}}>
+                    <div className="input-group-ge">
+                      <label className="input-label">Faculty Name</label>
+                      <input
+                        type="text"
+                        className="form-input-ge"
+                        placeholder={`Faculty ${index + 1}`}
+                        value={teacher.name}
+                        onChange={(e) =>
+                          handleChangeTeacherName(index, e.target.value)
+                        }
+                      />
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="periods-section">
+                    <h3 className="periods-title">Assign Periods (Total Periods/Week)</h3>
+                    <div className="periods-container">
+                      {teacher.periods.map((period, ind) => {
+                        return (
+                          <div className="period-row" key={ind}>
+                            {/* Delete Period Button (Show only if multiple assignments exist) */}
+                            {teacher.periods.length > 1 && (
+                              <button
+                                onClick={() => handleDeletePeriod(index, ind)}
+                                className="delete-period-btn"
+                                title="Delete Period"
+                              >
+                                <X className="icon-ge" />
+                              </button>
+                            )}
+
+                            <div className="input-group-ge">
+                              <label className="input-label">Class</label>
+                              <select
+                                className="form-select-ge"
+                                value={period.class_name}
+                                onChange={(e) => handleChangePeriod(index, ind, 'class_name', e.target.value)}
+                              >
+                                <option value="">Select Class</option>
+                                {classes.map((cls, i) => (
+                                  <option key={i} value={cls}>{cls}</option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div className="input-group-ge">
+                              <label className="input-label">Subject</label>
+                              <select
+                                className="form-select-ge"
+                                value={period.subject}
+                                onChange={(e) => handleChangePeriod(index, ind, 'subject', e.target.value)}
+                              >
+                                <option value="">Select Subject</option>
+                                {getAllSubjects().map((sub, sIndex) => (
+                                  <option key={sIndex} value={sub}>{sub}</option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div className="input-group-ge">
+                              <label className="input-label">Total Periods/Week (Lec/Lab)</label>
+                              <input
+                                type="number"
+                                className="form-input-ge"
+                                placeholder="Total periods"
+                                value={period.noOfPeriods}
+                                onChange={(e) => handleChangePeriod(index, ind, 'noOfPeriods', e.target.value)}
+                                min="0"
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      onClick={() => handleAddPeriod(index)}
+                      className="add-button-ge"
+                      style={{maxWidth: '300px'}}
+                    >
+                      <Plus className="icon-ge" />
+                      Add another subject assignment
+                    </button>
+                  </div>
                 </div>
+              );
+            })}
 
-                <button
-                  onClick={() => handleAddAssignment(fIndex)}
-                  className="add-button-ge"
-                >
-                  <Plus className="icon-ge" />
-                  Add another Load Assignment
-                </button>
-              </div>
+            <div className="add-teacher-container">
+              <button
+                onClick={handleAddTeacher}
+                className="add-button-ge add-teacher-btn"
+              >
+                <Plus className="icon-ge" />
+                Add another Faculty
+              </button>
             </div>
-          ))}
 
-          <div className="add-teacher-container">
-            <button
-              onClick={handleAddFaculty}
-              className="add-button-ge add-teacher-btn"
-            >
-              <Plus className="icon-ge" />
-              Add another Faculty
-            </button>
+            <div className="next-button-container-ge">
+              <button
+                className="next-button-ge"
+                onClick={generateTimetable}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="arrow-icon-ge animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  "Generate Timetable"
+                )}
+              </button>
+            </div>
           </div>
-
-          <div className="next-button-container-ge">
-            <button
-              className="next-button-ge"
-              onClick={generateTimetable}
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="arrow-icon-ge animate-spin" />
-                  Generating...
-                </>
-              ) : savedFacultyData ? (
-                "Regenerate Timetable"
-              ) : (
-                "Generate Timetable"
-              )}
-            </button>
-          </div>
-        </div>
+        ) : (
+             // --- Generated Timetable Actions ---
+            <div className="generated-actions-section-ge">
+                <h2 className="section-title-ge">Timetable Ready!</h2>
+                <p style={{color:'yellow', textAlign: 'center', padding: '1rem', fontWeight: 500}}>
+                    The timetable has been generated successfully. Click "Save" to finalize it and proceed to the display page.
+                </p>
+                <div className="action-buttons-container-ge">
+                    <button
+                        type="button"
+                        onClick={handleSavetoDb}
+                        className="action-button-ge save-button-ge"
+                        disabled={loading}
+                    >
+                        {loading ? <Loader2 className="spinner-ge" /> : "💾"} Save & View
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleEditFaculty}
+                        className="action-button-ge edit-button-ge"
+                        disabled={loading}
+                    >
+                        {loading ? <Loader2 className="spinner-ge" /> : "✍️"} Re-Edit Inputs
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleRegenerate}
+                        className="action-button-ge regenerate-button-ge"
+                        disabled={loading}
+                    >
+                        {loading ? <Loader2 className="spinner-ge" /> : "🔄"} Regenerate
+                    </button>
+                </div>
+            </div>
+        )}
       </div>
     </div>
   );
-}
+};
 
 export default AddTeacher;
