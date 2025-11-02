@@ -1,0 +1,13 @@
+/* body::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  background: linear-gradient(
+    to bottom,
+    #000000, #0f2027
+  ); 
+  min-height: 100vh;
+  color: white;
+} */
+
