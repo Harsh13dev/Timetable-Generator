@@ -1,4 +1,4 @@
-// frontend/src/pages/generate/TimetableDisplay.jsx (UPDATED CONTENT)
+// frontend/src/pages/generate/TimetableDisplay.jsx (Updated to display Batch)
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import jsPDF from "jspdf";
@@ -202,22 +202,21 @@ const TimetableDisplay = ({
 
   // --- Export Logic ---
 
-  const formatPeriodContent = (period) => {
-      // Logic for displaying the PeriodDetail object in the cell
+  const exportFormatPeriodContent = (period) => {
+      // Logic for displaying the PeriodDetail object in the cell for EXPORT (CSV/PDF)
       if (typeof period === 'object' && period !== null) {
-          const { faculty, subject, class_name, room, is_lab } = period;
+          const { faculty, subject, batch, room, is_lab } = period;
+          let output = `${subject}(${faculty}) [${room}]`;
           if (is_lab) {
-              // Lab periods are typically displayed as Subject(Faculty) [Batch, Lab]
-              return `${subject}(${faculty}) [${period.batch}, ${room}]`; 
+              output = `${subject}(${faculty}) [${room}, ${batch}]`; 
           }
-          // Lecture periods are typically displayed as Subject(Faculty) [Room]
-          return `${subject}(${faculty}) [${room}]`;
+          return output;
       }
       return String(period);
   };
 
   const exportAsPDF = async () => {
-    // ... (PDF export logic remains conceptually the same but uses formatPeriodContent)
+    // PDF export logic (using exportFormatPeriodContent)
   };
 
   const exportAsExcel = () => {
@@ -236,7 +235,7 @@ const TimetableDisplay = ({
             combined.push(["Day/Period", ...periodsToShow]);
             
             data.forEach((row, i) => {
-                const rowContent = row.map(period => period === "Free" || period === "" || period === undefined ? "Free" : formatPeriodContent(period));
+                const rowContent = row.map(period => period === "Free" || period === "" || period === undefined ? "Free" : exportFormatPeriodContent(period));
                 const paddedRow = [...rowContent];
                 while (paddedRow.length < actualPeriods) {
                     paddedRow.push("Free");
@@ -269,22 +268,21 @@ const TimetableDisplay = ({
     const daysToShow = generateDayNames(actualDays);
     const periodsToShow = generatePeriodNames(actualPeriods);
     
-    // Determine the label used inside the period cell
+    // Determine the label used inside the period cell for UI DISPLAY
     const getPeriodText = (period) => {
         if (typeof period === 'object' && period !== null) {
-            // Display logic for PeriodDetail object in the cell
             const { faculty, subject, class_name, room, is_lab, batch } = period;
-            let display = subject;
+            let display = `${subject}(${faculty})`;
             
-            if (viewMode === 'class' || viewMode === 'classroom') {
-                display += `(${faculty})`;
-            } else if (viewMode === 'faculty') {
-                display += ` - ${class_name}`;
-                if (is_lab) display += ` (${batch})`;
+            if (viewMode === 'faculty') {
+                display = `${subject} - ${class_name}`;
             }
-            
+
+            // ADDED BATCH DISPLAY: Batch is only relevant for Labs in Class/Faculty views
             if (is_lab) {
-                display += ` [${room}]`; // Show lab name in faculty/class view
+                display += ` [${room}] [${batch}]`; // Display room AND batch
+            } else {
+                display += ` [${room}]`; // Display room only for lectures
             }
 
             return display;
@@ -369,12 +367,11 @@ const TimetableDisplay = ({
           <div className="timetable-header">
             <h2 className="section-title-ge">{location.state.title}</h2>
             <div className="action-buttons-container">
-              {/* Removed Edit Timetable button as EditTimetable.jsx is not yet updated for 4 tables */}
               <button
                 type="button"
                 className="action-button-td edit-teachers-button-td"
                 onClick={() =>
-                  navigate("/generate/AddTeacher", { state: location.state })
+                  navigate("/generate/add-teachers", { state: location.state })
                 }
               >
                 <span className="button-icon-td">👥</span>

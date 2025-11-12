@@ -1,11 +1,10 @@
-// frontend/src/pages/generate/AddTeacher.jsx (FINAL CRASH-PROOF VERSION)
+// frontend/src/pages/generate/AddTeacher.jsx (FINAL CORRECTED VERSION with Simple UI)
+// You need to ensure this is the content of the file.
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import toast from "react-hot-toast";
 import { CircleX, Loader2, Plus, X, AlertTriangle } from "lucide-react"; 
-import "./AddTeacher.css";
-
-// NOTE: All external CSS imports were removed to resolve the crash.
+import "./AddTeacher.css"; // THIS LINE IS REQUIRED
 
 const AddTeacher = () => {
   const navigate = useNavigate();
@@ -123,7 +122,7 @@ const AddTeacher = () => {
               loadMap[key] = { lecture_load: 0, lab_load: 0 };
           }
           
-          const isLabSubject = p.subject.toLowerCase().includes('lab');
+          const isLabSubject = p.subject.toLowerCase().includes('lab') || p.subject.toLowerCase().includes('practical');
 
           if (isLabSubject) {
               if (totalLoad % 2 !== 0 && totalLoad > 0) {
