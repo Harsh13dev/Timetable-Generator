@@ -374,7 +374,7 @@ const TimetableDisplay = ({
                 type="button"
                 className="action-button-td edit-teachers-button-td"
                 onClick={() =>
-                  navigate("/generate/add-teachers", { state: location.state })
+                  navigate("/generate/AddTeacher", { state: location.state })
                 }
               >
                 <span className="button-icon-td">👥</span>

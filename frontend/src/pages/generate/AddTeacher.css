@@ -1,0 +1,258 @@
+/* frontend/src/pages/generate/AddTeacher.css (Required Styles to Prevent Crash) */
+
+/* General background and container styles */
+.dark-gradient-bg-ge {
+  background: linear-gradient(135deg, #000000 0%, #0a1a2e 25%, #16213e 50%, #0f4c75 75%, #3282b8 100%);
+  min-height: 100vh;
+  color: white;
+  position: relative;
+  overflow-x: hidden;
+  padding: 2rem 0;
+  margin-top: 60px;
+}
+
+.container-at {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.section-title-ge {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.info-alert {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  color: #93c5fd;
+  font-size: 0.9rem;
+  backdrop-filter: blur(10px);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.error-alert {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  color: #fca5a5;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(10px);
+}
+
+/* Faculty Card Styles */
+.teachers-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.teacher-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.delete-teacher-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Input Group Styles */
+.teacher-info-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.input-group-ge {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+
+.form-input-ge {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  font-size: 1rem;
+}
+
+.form-select-ge {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  font-size: 1rem;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+}
+
+/* Periods Section */
+.periods-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.periods-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.period-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  align-items: end;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.delete-period-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: none;
+  border-radius: 6px;
+  padding: 0.25rem;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  width: 32px;
+  z-index: 10;
+}
+
+/* Button commonality */
+.add-button-ge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.add-teacher-btn {
+  width: 100%;
+  max-width: 400px;
+  font-size: 1.1rem;
+  padding: 1.25rem;
+}
+
+.next-button-container-ge {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+}
+
+.next-button-ge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem 2.5rem;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* Generated Actions Section */
+.generated-actions-section-ge {
+    text-align: center;
+    padding: 3rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    margin-top: 3rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.action-buttons-container-ge {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.action-button-ge {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.save-button-ge {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.edit-button-ge {
+    background-color: #ff9800;
+    color: white;
+}
+.regenerate-button-ge {
+    background-color: #007bff;
+    color: white;
+}

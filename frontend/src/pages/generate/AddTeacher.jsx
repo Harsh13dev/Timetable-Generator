@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import toast from "react-hot-toast";
 import { CircleX, Loader2, Plus, X, AlertTriangle } from "lucide-react"; 
+import "./AddTeacher.css";
 
 // NOTE: All external CSS imports were removed to resolve the crash.
 
